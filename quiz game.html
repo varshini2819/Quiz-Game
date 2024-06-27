@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+    #container {
+      text-align: center;
+    }
+    .btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .hide {
+      display: none;
+    }
+    .correct {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .wrong {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="question-container" class="hide">
+      <div id="question">Question</div>
+      <div id="answer-buttons" class="btn-grid"></div>
+    </div>
+    <div id="result-container" class="hide">
+      <p id="result"></p>
+    </div>
+    <button id="start-btn" class="start-btn btn">Start</button>
+    <button id="next-btn" class="next-btn btn hide">Next</button>
+  </div>
+
+  <script>
+    const startButton = document.getElementById('start-btn');
+    const nextButton = document.getElementById('next-btn');
+    const questionContainerElement = document.getElementById('question-container');
+    const resultContainerElement = document.getElementById('result-container');
+    const questionElement = document.getElementById('question');
+    const answerButtonsElement = document.getElementById('answer-buttons');
+    const resultElement = document.getElementById('result');
+
+    let shuffledQuestions, currentQuestionIndex, score;
+
+    startButton.addEventListener('click', startGame);
+    nextButton.addEventListener('click', () => {
+      currentQuestionIndex++;
+      setNextQuestion();
+    });
+
+    function startGame() {
+      console.log('Game started');
+      startButton.classList.add('hide');
+      shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+      currentQuestionIndex = 0;
+      score = 0;
+      questionContainerElement.classList.remove('hide');
+      resultContainerElement.classList.add('hide');
+      setNextQuestion();
+    }
+
+    function setNextQuestion() {
+      console.log('Setting next question');
+      resetState();
+      showQuestion(shuffledQuestions[currentQuestionIndex]);
+    }
+
+    function showQuestion(question) {
+      console.log('Showing question:', question.question);
+      questionElement.innerText = question.question;
+      question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        if (answer.correct) {
+          button.dataset.correct = answer.correct;
+        }
+        button.addEventListener('click', selectAnswer);
+        answerButtonsElement.appendChild(button);
+      });
+    }
+
+    function resetState() {
+      clearStatusClass(document.body);
+      nextButton.classList.add('hide');
+      while (answerButtonsElement.firstChild) {
+        answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+      }
+    }
+
+    function selectAnswer(e) {
+      const selectedButton = e.target;
+      const correct = selectedButton.dataset.correct === 'true';
+      if (correct) {
+        score++;
+      }
+      console.log('Selected answer is correct:', correct);
+      setStatusClass(document.body, correct);
+      Array.from(answerButtonsElement.children).forEach(button => {
+        setStatusClass(button, button.dataset.correct === 'true');
+      });
+      if (shuffledQuestions.length > currentQuestionIndex + 1) {
+        nextButton.classList.remove('hide');
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      console.log('Showing result. Score:', score);
+      questionContainerElement.classList.add('hide');
+      resultContainerElement.classList.remove('hide');
+      resultElement.innerText = `You scored ${score} out of ${shuffledQuestions.length}!`;
+      startButton.innerText = 'Restart';
+      startButton.classList.remove('hide');
+    }
+
+    function setStatusClass(element, correct) {
+      clearStatusClass(element);
+      if (correct) {
+        element.classList.add('correct');
+      } else {
+        element.classList.add('wrong');
+      }
+    }
+
+    function clearStatusClass(element) {
+      element.classList.remove('correct');
+      element.classList.remove('wrong');
+    }
+
+    const questions = [
+      {
+        question: 'What is 2 + 2?',
+        answers: [
+          { text: '4', correct: true },
+          { text: '22', correct: false }
+        ]
+      },
+      {
+        question: 'What is the tallest mountain in the world?',
+        answers: [
+          { text: 'K2', correct: false },
+          { text: 'Mount Everest', correct: true },
+          { text: 'Mount Kilimanjaro', correct: false },
+          { text: 'Denali', correct: false }
+        ]
+      },
+      {
+        question: 'What does NASA stand for?',
+        answers: [
+          { text: 'North American Satellite Association', correct: false },
+          { text: 'National Aeronautics and Space Administration', correct: true },
+          { text: 'National American Space Association', correct: false },
+          { text: 'National Association of Space Astronauts', correct: false }
+        ]
+      },
+      {
+        question: 'How many bones are there in the adult human body?',
+        answers: [
+          { text: '306', correct: false },
+          { text: '216', correct: false },
+          { text: '208', correct: false },
+          { text: '206', correct: true }
+        ]
+      }
+    ];
+  </script>
+</body>
+</html>
